@@ -22,4 +22,4 @@ Desktop-приложение для автоматизации учёта зая
 1. Откройте `pgAdmin` или `DBeaver`.
 2. Создайте пустую базу данных:
    ```sql
-   CREATE DATABASE repair_db;
+   CREATE DATABASE repait_db;
