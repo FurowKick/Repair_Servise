@@ -1,0 +1,58 @@
+-- Удаление таблиц в обратном порядке (из-за внешних ключей)
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS requests CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS roles CASCADE;
+DROP TABLE IF EXISTS statuses CASCADE;
+
+-- 1. Роли
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(30) UNIQUE NOT NULL
+);
+
+-- 2. Пользователи
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    login VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INT REFERENCES roles(role_id) ON DELETE RESTRICT
+);
+
+-- 3. Статусы
+CREATE TABLE statuses (
+    status_id SERIAL PRIMARY KEY,
+    status_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- 4. Заявки
+CREATE TABLE requests (
+    request_id SERIAL PRIMARY KEY,
+    created_date DATE NOT NULL,
+    equipment_type VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    problem_description TEXT,
+    status_id INT REFERENCES statuses(status_id) ON DELETE RESTRICT,
+    completion_date DATE,
+    parts_info TEXT,
+    assigned_master_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+    client_id INT REFERENCES users(user_id) ON DELETE RESTRICT
+);
+
+-- 5. Комментарии
+CREATE TABLE comments (
+    comment_id SERIAL PRIMARY KEY,
+    message TEXT NOT NULL,
+    master_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+    request_id INT REFERENCES requests(request_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Заполнение справочников
+INSERT INTO roles (role_id, role_name) VALUES
+(1, 'Менеджер'), (2, 'Мастер'), (3, 'Оператор'), (4, 'Заказчик');
+
+INSERT INTO statuses (status_id, status_name) VALUES
+(1, 'Новая заявка'), (2, 'В процессе ремонта'), (3, 'Ожидание запчастей'), (4, 'Готова к выдаче');
